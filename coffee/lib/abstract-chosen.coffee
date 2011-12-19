@@ -93,6 +93,9 @@ class AbstractChosen
   result_add_group: (group) ->
     """<li class="group-result">#{group.search_text}</li>"""
 
+  append_option: (option) ->
+    this.select_append_option(option)
+
   results_update_field: ->
     this.set_default_text()
     this.results_reset_cleanup() if not @is_multiple
