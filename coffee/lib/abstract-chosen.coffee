@@ -121,11 +121,13 @@ class AbstractChosen
     this.no_results_clear()
 
     results = 0
+    exact_result = false
 
     searchText = this.get_search_text()
     regexAnchor = if @search_contains then "" else "^"
     regex = new RegExp(regexAnchor + searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
     zregex = new RegExp(searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
+    eregex = new RegExp('^' + searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") + '$', 'i')
 
     for option in @results_data
       if not option.empty
@@ -138,6 +140,8 @@ class AbstractChosen
           option.search_text = if option.group then option.label else option.html
           option.search_match = this.search_string_match(option.search_text, regex)
           results += 1 if option.search_match
+
+          exact_result = eregex.test option.html
 
           if option.search_match
             if searchText.length
@@ -153,12 +157,12 @@ class AbstractChosen
     if results < 1 and searchText.length
       this.update_results_content ""
       this.result_clear_highlight()
-      this.no_results searchText
+      this.no_results searchText unless @create_option and @skip_no_results
     else
       this.update_results_content this.results_option_build()
       this.winnow_results_set_highlight()
 
-    if @create_option and (results < 1 or (exact_result and @persistent_create_option)) and searchText.length
+    if @create_option and (results < 1 or (!exact_result and @persistent_create_option)) and searchText.length
       this.show_create_option( searchText )
 
   search_string_match: (search_string, regex) ->
